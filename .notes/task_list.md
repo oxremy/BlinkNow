@@ -119,4 +119,29 @@
 4. Phase 4.1 → 4.2 (Integration)
 5. Phase 5.1 → 5.2 (Deployment)
 
+### Status Bar Button Implementation
+1. Update `StatusBarController` menu construction
+   - Verify button positioning above Preferences
+   - Ensure proper visual feedback during press states
+2. Modify `FadeButtonView` to handle:
+   - Standard menu item hover effects
+   - Pressed state visualization
+   - Proper text alignment and styling
+3. Connect button states to `FadeWindowController`
+   - Begin fade on mouseDown
+   - End fade on mouseUp
+4. Add accessibility features:
+   - VoiceOver support
+   - Proper button role declaration
+
+### Fade Effect Fixes
+1. Update default fade color in PreferencesManager
+   - Change from semi-transparent black (0.8 alpha) to solid black
+2. Modify FadeWindowController's visual setup
+   - Replace NSVisualEffectView with solid color layer
+3. Adjust animation timing
+   - Ensure full opacity is reached
+4. Verify window level and coverage
+   - Confirm screenSaver level behavior
+
 

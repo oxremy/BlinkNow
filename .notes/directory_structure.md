@@ -14,10 +14,21 @@ BlinkNow
 │   │       └── contents
 │   ├── BlinkNowApp.swift
 │   ├── ContentView.swift
+│   ├── Extensions
+│   │   ├── CGColor+Gamma.swift
+│   │   └── NSApplication+Error.swift
+│   ├── FadeButtonView.swift
+│   ├── FadeWindowController.swift
 │   ├── Persistence.swift
-│   └── Preview Content
-│       └── Preview Assets.xcassets
-│           └── Contents.json
+│   ├── PreferencesManager.swift
+│   ├── PreferencesView.swift
+│   ├── PreferencesWindowController.swift
+│   ├── Preview Content
+│   │   └── Preview Assets.xcassets
+│   │       └── Contents.json
+│   ├── Scripts
+│   │   └── notarize.sh
+│   └── StatusBarController.swift
 ├── BlinkNow.xcodeproj
 │   ├── project.pbxproj
 │   ├── project.xcworkspace
