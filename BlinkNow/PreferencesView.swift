@@ -7,9 +7,9 @@ struct PreferencesView: View {
         VStack(alignment: .leading, spacing: 20) {
             // Speed Control
             VStack(alignment: .leading) {
-                Text("Fade Speed: \(preferences.fadeSpeed, specifier: "%.2f")s")
+                Text("Fade Speed: \(preferences.fadeSpeed, specifier: "%.1f")s")
                     .font(.headline)
-                Slider(value: $preferences.fadeSpeed, in: 0.01...0.2, step: 0.01) {
+                Slider(value: $preferences.fadeSpeed, in: 1...10, step: 0.1) {
                     Text("Fade Speed")
                 }
             }

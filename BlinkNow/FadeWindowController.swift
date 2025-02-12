@@ -9,6 +9,7 @@ class FadeWindowController {
     private let animationQueue = DispatchQueue(label: "com.oxremy.BlinkNow.animation", qos: .userInteractive)
     private var currentAnimations = [CALayer: CAAnimation]()
     private var cancellables = Set<AnyCancellable>()
+    private var activeAnimations = [UUID: CALayer]()
     
     init(preferences: PreferencesManager) {
         self.preferences = preferences
@@ -55,12 +56,16 @@ class FadeWindowController {
     private func handleAnimationError(_ error: Error) {
         DispatchQueue.main.async {
             NSApplication.shared.presentCustomError(error)
-            self.endFade()
+            if let (id, _) = self.activeAnimations.first {
+                self.endFade(animationID: id)
+            }
             PreferencesManager.shared.resetToDefaults()
         }
     }
     
-    func startFade() {
+    func startFade() -> UUID {
+        let animationID = UUID()
+        
         animationQueue.async { [weak self] in
             guard let self = self else { return }
             
@@ -102,30 +107,38 @@ class FadeWindowController {
                     screenWindow.orderFrontRegardless()
                     
                     self.animationLayers.append(fadeLayer)
+                    
+                    // Add error handling delegate with animation ID
+                    let errorDelegate = ErrorHandlingDelegate { [weak self] error in
+                        self?.handleAnimationError(error)
+                    }
+                    animation.delegate = errorDelegate
+                    
+                    self.activeAnimations[animationID] = fadeLayer
                 }
             }
         }
+        
+        return animationID
     }
     
-    func endFade() {
+    func endFade(animationID: UUID) {
         animationQueue.async { [weak self] in
-            guard let self = self else { return }
+            guard let layer = self?.activeAnimations[animationID] else { return }
             
             DispatchQueue.main.sync {
-                self.animationLayers.forEach { layer in
-                    let animation = CABasicAnimation(keyPath: "opacity")
-                    animation.fromValue = 1.0
-                    animation.toValue = 0.0
-                    animation.duration = self.preferences.fadeSpeed
-                    animation.fillMode = .forwards
-                    animation.isRemovedOnCompletion = false
-                    
-                    layer.add(animation, forKey: "fadeOut")
-                }
+                layer.removeAllAnimations()
                 
-                DispatchQueue.main.asyncAfter(deadline: .now() + self.preferences.fadeSpeed) {
-                    self.animationLayers.forEach { $0.removeFromSuperlayer() }
-                    self.animationLayers.removeAll()
+                let animation = CABasicAnimation(keyPath: "opacity")
+                animation.fromValue = layer.presentation()?.opacity ?? 1.0
+                animation.toValue = 0.0
+                animation.duration = 0.1
+                
+                layer.add(animation, forKey: "fadeOut")
+                
+                DispatchQueue.main.asyncAfter(deadline: .now() + animation.duration) {
+                    layer.removeFromSuperlayer()
+                    self?.activeAnimations.removeValue(forKey: animationID)
                 }
             }
         }
@@ -143,6 +156,7 @@ class FadeWindowController {
 
 private class ErrorHandlingDelegate: NSObject, CAAnimationDelegate {
     let handler: (Error) -> Void
+    var animationID: UUID?
     
     init(handler: @escaping (Error) -> Void) {
         self.handler = handler

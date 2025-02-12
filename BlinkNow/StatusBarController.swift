@@ -5,6 +5,7 @@ class StatusBarController {
     private var fadeWindow: FadeWindowController
     private var preferences: PreferencesManager
     private var observers = [NSObjectProtocol]()
+    private var activeAnimationID: UUID?
     
     init(preferences: PreferencesManager) {
         self.preferences = preferences
@@ -35,16 +36,13 @@ class StatusBarController {
             title: "Fade Screen",
             preferences: preferences
         ) { [weak self] state in
-            guard let self = self else { return }
             switch state {
             case .leftMouseDown:
-                self.fadeWindow.startFade()
-                NSHapticFeedbackManager.defaultPerformer.perform(
-                    .levelChange,
-                    performanceTime: .now
-                )
+                self?.activeAnimationID = self?.fadeWindow.startFade()
             case .leftMouseUp, .leftMouseDragged:
-                self.fadeWindow.endFade()
+                if let id = self?.activeAnimationID {
+                    self?.fadeWindow.endFade(animationID: id)
+                }
             default: break
             }
         }
@@ -75,7 +73,9 @@ class StatusBarController {
             center.addObserver(forName: NSApplication.didResignActiveNotification,
                                object: nil,
                                queue: .main) { [weak self] _ in
-                self?.fadeWindow.endFade()
+                if let id = self?.activeAnimationID {
+                    self?.fadeWindow.endFade(animationID: id)
+                }
             }
         )
         
@@ -93,14 +93,18 @@ class StatusBarController {
     }
     
     func endActiveFade() {
-        fadeWindow.endFade()
+        if let id = activeAnimationID {
+            fadeWindow.endFade(animationID: id)
+        }
     }
     
     @objc private func handleFadePress(_ sender: NSButton) {
         if sender.state == .on || sender.isHighlighted {
-            fadeWindow.startFade()
+            activeAnimationID = fadeWindow.startFade()
         } else {
-            fadeWindow.endFade()
+            if let id = activeAnimationID {
+                fadeWindow.endFade(animationID: id)
+            }
         }
     }
     

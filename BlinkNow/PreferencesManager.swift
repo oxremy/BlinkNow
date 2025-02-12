@@ -20,8 +20,8 @@ class PreferencesManager: ObservableObject {
     }
     
     init() {
-        // Speed defaults (0.01-0.2 seconds)
-        fadeSpeed = UserDefaults.standard.double(forKey: "fadeSpeed").clamped(to: 0.01...0.2)
+        // Speed defaults (1.0-10.0 seconds)
+        fadeSpeed = UserDefaults.standard.double(forKey: "fadeSpeed").clamped(to: 1.0...10.0)
         
         // Set default color to solid black
         fadeColor = NSColor.black
@@ -39,7 +39,7 @@ class PreferencesManager: ObservableObject {
     }
     
     func resetToDefaults() {
-        fadeSpeed = 0.1
+        fadeSpeed = 3.0
         fadeColor = NSColor.black
     }
 }
